@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 from sqlalchemy import (
-    Integer, String, Text, DateTime, ForeignKey,
+    Boolean, Integer, String, Text, DateTime, ForeignKey,
     Index, UniqueConstraint, text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -34,6 +34,9 @@ class DnsRecord(Base):
     )
     values_json: Mapped[str] = mapped_column(
         Text, nullable=False  # JSON array stored as text
+    )
+    is_system: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("0")
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=text("(datetime('now'))")
