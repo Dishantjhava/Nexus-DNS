@@ -162,6 +162,7 @@ class DnsRecordResponse(BaseModel):
     type: str
     ttl: int
     values: list[str | MxValue | SrvValue | CaaValue]  # deserialized from values_json
+    is_system: bool = False
     created_at: datetime
     updated_at: datetime
 
