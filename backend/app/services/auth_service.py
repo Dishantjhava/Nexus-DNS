@@ -14,7 +14,7 @@ import secrets
 from datetime import datetime, timedelta
 
 from passlib.hash import bcrypt
-from sqlalchemy.orm import Session as DBSession
+from sqlalchemy.orm import Session as DBSession, joinedload
 
 from app.config import SECRET_KEY, SESSION_TTL_HOURS
 from app.models.session import Session
@@ -60,6 +60,7 @@ def get_user_by_token(db: DBSession, raw_token: str | None) -> User | None:
     token_hash = _hash_token(raw_token)
     session = (
         db.query(Session)
+        .options(joinedload(Session.user))
         .filter(Session.token_hash == token_hash)
         .first()
     )
