@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session as DBSession
 
-from app.config import COOKIE_NAME, SESSION_TTL_HOURS
+from app.config import COOKIE_NAME, IS_PRODUCTION, SESSION_TTL_HOURS
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.exceptions import AppException
@@ -17,6 +17,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 @router.post("/login")
 def login(
     body: LoginRequest,
+    request: Request,
     response: Response,
     db: DBSession = Depends(get_db),
 ):
@@ -26,14 +27,15 @@ def login(
         raise AppException(401, "INVALID_CREDENTIALS", "Invalid username or password")
 
     raw_token = auth_service.create_session(db, user.id)
+    is_secure = IS_PRODUCTION or (request.url.scheme == "https" and "localhost" not in request.url.netloc and "127.0.0.1" not in request.url.netloc and "testserver" not in request.url.netloc)
 
     response.set_cookie(
         key=COOKIE_NAME,
         value=raw_token,
         max_age=SESSION_TTL_HOURS * 3600,
         httponly=True,
-        samesite="lax",
-        secure=False,  # dev — set True behind HTTPS in production
+        samesite="none" if is_secure else "lax",
+        secure=is_secure,
         path="/",
     )
 
@@ -49,7 +51,13 @@ def logout(
     """Invalidate the current session and clear the cookie."""
     token = request.cookies.get(COOKIE_NAME)
     auth_service.delete_session(db, token)
-    response.delete_cookie(key=COOKIE_NAME, path="/")
+    is_secure = IS_PRODUCTION or (request.url.scheme == "https" and "localhost" not in request.url.netloc and "127.0.0.1" not in request.url.netloc and "testserver" not in request.url.netloc)
+    response.delete_cookie(
+        key=COOKIE_NAME,
+        path="/",
+        samesite="none" if is_secure else "lax",
+        secure=is_secure,
+    )
     return {"message": "Logged out"}
 
 

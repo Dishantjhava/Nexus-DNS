@@ -18,6 +18,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 SESSION_TTL_HOURS = int(os.environ.get("SESSION_TTL_HOURS", "24"))
 COOKIE_NAME = os.environ.get("COOKIE_NAME", "session_token")
 
+# ── Environment ──────────────────────────────────────────
+IS_PRODUCTION = os.environ.get("RAILWAY_ENVIRONMENT") is not None or os.environ.get("ENVIRONMENT") == "production"
+
 # ── CORS ─────────────────────────────────────────────────
 cors_raw = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
 CORS_ORIGINS = [origin.strip() for origin in cors_raw.split(",") if origin.strip()]
