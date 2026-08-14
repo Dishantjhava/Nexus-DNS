@@ -92,10 +92,10 @@ class TestCreateRecord:
 
 
 class TestListRecords:
-    def test_default_ns_only(self, auth_client, zone_id):
+    def test_default_system_records(self, auth_client, zone_id):
         resp = auth_client.get(f"/api/hosted-zones/{zone_id}/records")
         assert resp.status_code == 200
-        assert resp.json()["total"] == 1  # 1 auto-generated system NS record
+        assert resp.json()["total"] == 2  # 2 auto-generated system records (NS + SOA)
 
     def test_with_records(self, auth_client, zone_id):
         auth_client.post(f"/api/hosted-zones/{zone_id}/records", json={
@@ -106,7 +106,7 @@ class TestListRecords:
         })
 
         resp = auth_client.get(f"/api/hosted-zones/{zone_id}/records")
-        assert resp.json()["total"] == 3  # 1 system NS + 2 user records
+        assert resp.json()["total"] == 4  # 2 system records + 2 user records
 
     def test_filter_by_type(self, auth_client, zone_id):
         auth_client.post(f"/api/hosted-zones/{zone_id}/records", json={
@@ -232,17 +232,31 @@ class TestDeleteRecord:
 
 
 class TestSystemRecords:
-    def test_default_ns_created_on_zone_creation(self, auth_client, zone_id):
+    def test_default_ns_and_soa_created_on_zone_creation(self, auth_client, zone_id):
         resp = auth_client.get(f"/api/hosted-zones/{zone_id}/records")
         assert resp.status_code == 200
         items = resp.json()["items"]
-        assert len(items) == 1
-        ns_rec = items[0]
-        assert ns_rec["type"] == "NS"
-        assert ns_rec["name"] == "test.com."
+        assert len(items) == 2
+        types = {item["type"] for item in items}
+        assert types == {"NS", "SOA"}
+
+        for rec in items:
+            assert rec["name"] == "test.com."
+            assert rec["is_system"] is True
+
+        ns_rec = next(item for item in items if item["type"] == "NS")
         assert ns_rec["ttl"] == 172800
-        assert ns_rec["is_system"] is True
         assert len(ns_rec["values"]) == 4
+
+        soa_rec = next(item for item in items if item["type"] == "SOA")
+        assert soa_rec["ttl"] == 900
+        assert len(soa_rec["values"]) == 1
+
+    def test_create_soa_rejected(self, auth_client, zone_id):
+        resp = auth_client.post(f"/api/hosted-zones/{zone_id}/records", json={
+            "name": "test.com", "type": "SOA", "ttl": 900, "values": ["ns-1.com. hostmaster.com. 1 7200 900 1209600 86400"],
+        })
+        assert resp.status_code == 422  # validation error: SOA cannot be created manually
 
     def test_patch_system_record_returns_403(self, auth_client, zone_id):
         resp = auth_client.get(f"/api/hosted-zones/{zone_id}/records")

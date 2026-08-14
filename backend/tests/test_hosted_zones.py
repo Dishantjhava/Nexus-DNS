@@ -12,8 +12,10 @@ class TestCreateZone:
         data = resp.json()
         assert data["name"] == "test.com"
         assert data["zone_type"] == "PUBLIC"
-        assert data["record_count"] == 1  # auto-generated system NS record
+        assert data["record_count"] == 2  # auto-generated system NS + SOA records
         assert "id" in data
+        assert "public_zone_id" in data
+        assert data["public_zone_id"].startswith("Z")
 
     def test_private_zone(self, auth_client):
         resp = auth_client.post("/api/hosted-zones", json={
@@ -23,13 +25,12 @@ class TestCreateZone:
         assert resp.status_code == 201
         assert resp.json()["zone_type"] == "PRIVATE"
 
-    def test_duplicate_names_allowed(self, auth_client):
-        """hosted_zones.name is NOT unique — duplicate names allowed."""
+    def test_duplicate_names_rejected(self, auth_client):
+        """Duplicate zone creation with same name and zone_type returns 409 Conflict."""
         r1 = auth_client.post("/api/hosted-zones", json={"name": "dup.com"})
         r2 = auth_client.post("/api/hosted-zones", json={"name": "dup.com"})
         assert r1.status_code == 201
-        assert r2.status_code == 201
-        assert r1.json()["id"] != r2.json()["id"]
+        assert r2.status_code == 409
 
     def test_unauthenticated(self, client):
         resp = client.post("/api/hosted-zones", json={"name": "t.com"})

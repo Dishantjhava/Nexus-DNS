@@ -22,6 +22,7 @@ from app.models.user import User
 from app.models.session import Session  # noqa: F401 — register table
 from app.models.hosted_zone import HostedZone
 from app.models.dns_record import DnsRecord
+from app.services.hosted_zone_service import generate_public_zone_id
 
 
 # ── Seed data ────────────────────────────────────────────
@@ -143,14 +144,19 @@ def seed():
 
     db = SessionLocal()
     try:
-        # ── Demo user ────────────────────────────────────
+        # ── Demo users ────────────────────────────────────
         admin = User(
             username="admin",
             password_hash=bcrypt.hash("admin123"),
         )
+        admin_email = User(
+            username="admin@gmail.com",
+            password_hash=bcrypt.hash("admin123"),
+        )
         db.add(admin)
+        db.add(admin_email)
         db.flush()
-        print(f"  Created user: admin (password: admin123)")
+        print(f"  Created users: admin & admin@gmail.com (password: admin123)")
 
         # ── Hosted zones + records ───────────────────────
         total_records = 0
@@ -162,6 +168,7 @@ def seed():
         ]
         for zone_data in ZONES:
             zone = HostedZone(
+                public_zone_id=generate_public_zone_id(),
                 name=zone_data["name"],
                 description=zone_data["description"],
                 zone_type=zone_data["zone_type"],
@@ -169,7 +176,7 @@ def seed():
             db.add(zone)
             db.flush()  # get zone.id for FK
 
-            # Auto-generated system NS record (FQDN trailing dot)
+            # Auto-generated system NS & SOA records (FQDN trailing dot)
             apex_name = zone.name if zone.name.endswith(".") else f"{zone.name}."
             sys_ns = DnsRecord(
                 hosted_zone_id=zone.id,
@@ -180,7 +187,18 @@ def seed():
                 is_system=True,
             )
             db.add(sys_ns)
-            record_count = 1
+
+            soa_val = f"{default_ns[0]}. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+            sys_soa = DnsRecord(
+                hosted_zone_id=zone.id,
+                name=apex_name,
+                type="SOA",
+                ttl=900,
+                values_json=json.dumps([soa_val]),
+                is_system=True,
+            )
+            db.add(sys_soa)
+            record_count = 2
 
             for rec in zone_data["records"]:
                 # Avoid duplicate NS at apex if zone_data already defines one
