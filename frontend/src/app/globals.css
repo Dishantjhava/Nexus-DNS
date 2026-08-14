@@ -1,0 +1,191 @@
+@import "@cloudscape-design/global-styles/index.css";
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --aws-nav-bg: #232F3E;
+    --aws-nav-text: #FFFFFF;
+    --aws-sidebar-bg: #FFFFFF;
+    --aws-sidebar-text: #16191F;
+    --aws-sidebar-active: #0972D3;
+    --aws-content-bg: #F2F3F3;
+    --aws-card-bg: #FFFFFF;
+    --aws-border: #E9EAEA;
+    --aws-orange: #EC7211;
+    --aws-blue: #0972D3;
+    --aws-text-primary: #16191F;
+    --aws-text-muted: #5F6B7A;
+    --aws-table-header-bg: #F2F3F3;
+    --aws-row-hover: #F2F8FD;
+  }
+
+  .dark, [data-theme="dark"], body.awsui-dark-mode {
+    --aws-nav-bg: #0F1B2A;
+    --aws-nav-text: #E9EDF0;
+    --aws-sidebar-bg: #0F1B2A;
+    --aws-sidebar-text: #E9EDF0;
+    --aws-sidebar-active: #539FE5;
+    --aws-content-bg: #0F1B2A;
+    --aws-card-bg: #162232;
+    --aws-border: #233246;
+    --aws-orange: #EC7211;
+    --aws-blue: #539FE5;
+    --aws-text-primary: #FFFFFF;
+    --aws-text-muted: #9BA7B6;
+    --aws-table-header-bg: #1A283A;
+    --aws-row-hover: #1E2F44;
+  }
+
+  body {
+    background-color: var(--aws-content-bg);
+    color: var(--aws-text-primary);
+    font-family: "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    color: #16191F;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    color: #16191F;
+    margin: 0;
+  }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 16px;
+    color: #16191F;
+    margin: 0;
+  }
+
+  a {
+    color: #0972D3;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* AWS Orange Primary Buttons */
+  button[class*="awsui_variant-primary_"],
+  a[class*="awsui_variant-primary_"] {
+    background-color: #EC7211 !important;
+    border-color: #EC7211 !important;
+    color: #FFFFFF !important;
+    border-radius: 16px !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
+  }
+
+  button[class*="awsui_variant-primary_"]:hover,
+  a[class*="awsui_variant-primary_"]:hover {
+    background-color: #EB5F07 !important;
+    border-color: #EB5F07 !important;
+  }
+
+  /* Dark mode headings, links, and background overrides */
+  .dark h1, [data-theme="dark"] h1, body.awsui-dark-mode h1,
+  .dark h2, [data-theme="dark"] h2, body.awsui-dark-mode h2,
+  .dark h3, [data-theme="dark"] h3, body.awsui-dark-mode h3 {
+    color: #FFFFFF !important;
+  }
+
+  .dark a, [data-theme="dark"] a, body.awsui-dark-mode a {
+    color: #539FE5 !important;
+  }
+
+  /* Dark mode Top Navigation & Header Bar */
+  .dark header, [data-theme="dark"] header, body.awsui-dark-mode header,
+  .dark #aws-header, [data-theme="dark"] #aws-header, body.awsui-dark-mode #aws-header {
+    background-color: #0F1B2A !important;
+    border-color: #233246 !important;
+    color: #E9EDF0 !important;
+  }
+
+  /* Dark mode Navigation Sidebar */
+  .dark nav, [data-theme="dark"] nav, body.awsui-dark-mode nav,
+  .dark aside, [data-theme="dark"] aside, body.awsui-dark-mode aside {
+    background-color: #0F1B2A !important;
+    border-color: #233246 !important;
+  }
+
+  /* Dark mode Secondary / Normal Buttons (pill outlines e.g. Delete zone, Test record) */
+  .dark button[class*="awsui_button_"]:not([class*="awsui_variant-primary_"]),
+  [data-theme="dark"] button[class*="awsui_button_"]:not([class*="awsui_variant-primary_"]),
+  body.awsui-dark-mode button[class*="awsui_button_"]:not([class*="awsui_variant-primary_"]) {
+    background-color: #162334 !important;
+    border-color: #539FE5 !important;
+    color: #539FE5 !important;
+  }
+
+  /* Dark mode Container / Card Boxes */
+  .dark [class*="awsui_container_"],
+  [data-theme="dark"] [class*="awsui_container_"],
+  body.awsui-dark-mode [class*="awsui_container_"] {
+    background-color: #162232 !important;
+    border-color: #233246 !important;
+    color: #E9EDF0 !important;
+  }
+
+  /* Dark mode Table Headers and Row Hover */
+  .dark [class*="awsui_header-cell_"],
+  [data-theme="dark"] [class*="awsui_header-cell_"],
+  body.awsui-dark-mode [class*="awsui_header-cell_"] {
+    background-color: #1A283A !important;
+    border-color: #233246 !important;
+    color: #E9EDF0 !important;
+  }
+
+  /* Custom visible Sidebar Scrollbar & Sticky Anchoring */
+  nav[class*="awsui_navigation_"],
+  aside[class*="awsui_sidebar_"],
+  div[class*="awsui_drawer_"],
+  [class*="awsui_navigation-container_"] {
+    scrollbar-width: thin !important;
+    scrollbar-color: #8D9BAA #FFFFFF !important;
+    position: sticky !important;
+    top: 0 !important;
+    max-height: calc(100vh - 65px) !important;
+    overflow-y: auto !important;
+  }
+
+  nav[class*="awsui_navigation_"]::-webkit-scrollbar,
+  aside[class*="awsui_sidebar_"]::-webkit-scrollbar,
+  div[class*="awsui_drawer_"]::-webkit-scrollbar,
+  [class*="awsui_navigation-container_"]::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  nav[class*="awsui_navigation_"]::-webkit-scrollbar-thumb,
+  aside[class*="awsui_sidebar_"]::-webkit-scrollbar-thumb,
+  div[class*="awsui_drawer_"]::-webkit-scrollbar-thumb,
+  [class*="awsui_navigation-container_"]::-webkit-scrollbar-thumb {
+    background-color: #8D9BAA !important;
+    border-radius: 3px !important;
+  }
+
+  /* ── Hide Cloudscape's own split-panel open button (we use our Breadcrumbs toggle) ── */
+  button[class*="awsui_open-button_"],
+  [class*="awsui_open-button_"] {
+    display: none !important;
+  }
+
+  /* ── Tighten AppLayout content-area top padding to match AWS compact table layout ── */
+  [class*="awsui_content_"][class*="awsui_content-type-default_"] {
+    padding-block-start: 0px !important;
+  }
+}
