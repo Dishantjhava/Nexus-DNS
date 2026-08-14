@@ -91,8 +91,18 @@ async def unhandled_exception_handler(_request: Request, exc: Exception):
     )
 
 
+# ── Health Check ──────────────────────────────────────────
+
+@app.get("/health")
+@app.get("/")
+async def health_check():
+    """Health check endpoint for Railway deployment monitoring."""
+    return {"status": "ok", "service": "Nexus DNS API"}
+
+
 # ── Routers ──────────────────────────────────────────────
 
 app.include_router(auth.router)
 app.include_router(hosted_zones.router)
 app.include_router(dns_records.router)
+
