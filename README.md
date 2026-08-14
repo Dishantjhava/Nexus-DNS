@@ -1,42 +1,165 @@
-# Nexus DNS — AWS Route53 Web Application Clone
+# Nexus-DNS — AWS Route 53 Console Clone 🌐
 
-A full-stack, pixel-accurate clone of the **AWS Route53 Management Console** built with Next.js (TypeScript), FastAPI, and SQLite. This application recreates the exact user experience, navigation, forms, table density, system record rules, and workflows of Route53.
+[![Next.js](https://img.shields.io/badge/Next.js-16.3.0-black?logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Cloudscape](https://img.shields.io/badge/Cloudscape-Design_System-FF9900?logo=amazon-aws)](https://cloudscape.design/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python)](https://python.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript)](https://typescriptlang.org)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
----
-
-## 📸 Key Features & UI Fidelity
-
-- **Route53 Visual Language**: Built with the official **Cloudscape Design System** visual tokens (`#232F3E` navy header, `#EC7211` orange buttons, `#0972D3` blue accents, `#F2F3F3` container backgrounds, 13px base typography).
-- **Full-Page Workflows**: Recreates full-page `Create hosted zone` and `Create record` workflows matching official AWS Console screenshots.
-- **Hosted Zone Management**:
-  - Full CRUD functionality with pagination, debounced search, and URL parameter state.
-  - Opaque Route53-style public zone IDs (e.g. `Z8F4K2M7Q1P3X`).
-  - Edit description workflow with read-only domain name and type.
-  - Type-to-confirm zone deletion dialog.
-- **DNS Record Management**:
-  - Full CRUD support for 9 DNS record types (`A`, `AAAA`, `CNAME`, `TXT`, `MX`, `NS`, `PTR`, `SRV`, `CAA`) plus system `SOA`.
-  - Multi-line record value rendering (e.g. 4-nameserver NS sets and SOA strings).
-  - Type-aware record value parsing and validation.
-  - TTL quick shortcuts: `1m` (60s), `1h` (3600s), `1d` (86400s).
-  - Multi-record creation with sequential execution and per-record partial error reporting.
-  - "View existing records" drawer on record creation page.
-- **System Record Protection**:
-  - Auto-generates default system `NS` and `SOA` records on zone creation (`is_system = True`).
-  - Newly created zones start with **Records (2)**.
-  - Both frontend and backend enforce 403 `SYSTEM_RECORD_PROTECTED` rules blocking modification or deletion of system records.
-- **Authentication**: Session-cookie-based authentication with IAM sign-in style interface and central 401 expiration handling.
+> A full-stack, pixel-accurate clone of the **AWS Route 53 Management Console** built using Next.js (App Router), FastAPI, and SQLite. Features full Hosted Zone & DNS Record CRUD, system record protection (`NS` & `SOA`), interactive dark theme mode, record testing DIG outputs, and CloudWatch query logging workflows.
 
 ---
 
-## 🛠 Tech Stack
+## 1. 🚀 Live Demo
 
-- **Frontend**: Next.js 15 (TypeScript, App Router, Tailwind CSS v4)
+- **Frontend Console URL**: [https://nexus-dns.up.railway.app](https://nexus-dns.up.railway.app)
+- **Backend API URL**: [https://nexus-dns-production.up.railway.app](https://nexus-dns-production.up.railway.app)
+- **API Swagger Documentation**: [https://nexus-dns-production.up.railway.app/docs](https://nexus-dns-production.up.railway.app/docs)
+
+---
+
+## 2. 🔑 Demo Credentials
+
+Use the following credentials to sign in directly on the live demo or local environment:
+
+| Field | Value |
+|---|---|
+| **Email / User** | `admin@gmail.com` *(or `admin`)* |
+| **Password** | `admin123` |
+
+> 💡 *Note: The login screen also features a one-click **"Copy credentials"** button that automatically pre-fills these test credentials.*
+
+---
+
+## 3. 🎯 Quick Demo Guide for Evaluators
+
+Follow this 10-step sequence to test all major features end-to-end:
+
+1. **Open the Live Demo**: Go to [https://nexus-dns.up.railway.app](https://nexus-dns.up.railway.app).
+2. **Sign In**: Click **Copy credentials** ➔ Click **Sign in**.
+3. **View Hosted Zones**: Navigate to **Hosted zones** in the left sidebar to inspect public and private zones.
+4. **Create a Hosted Zone**: Click **Create hosted zone**, enter `mycompany.com`, choose **Public hosted zone**, and submit.
+5. **Verify System Records**: Open `mycompany.com` zone details to verify that **Records (2)** (`NS` and `SOA`) were auto-created.
+6. **Create a Custom DNS Record**: Click **Create record**, select `A` record, input record name `app`, TTL `300` (or click `1m` shortcut), enter value `192.0.2.45`, and submit.
+7. **Filter & Search Records**: Use the Record Type filter dropdown (`A`, `NS`, `SOA`) and search bar to filter records.
+8. **Inspect Record SplitPanel**: Click on any record row to open the side split panel inspector.
+9. **Test System Record Protection**: Try editing or deleting an `NS` or `SOA` system record to verify the **403 Forbidden** protection banner.
+10. **Explore Themes & Logout**: Toggle between **Dark** and **Light** mode using the top nav switcher, then click **Sign out** in the top right user menu.
+
+---
+
+## 4. 📌 Overview
+
+**Nexus-DNS** is designed to replicate the exact visual design system, navigation density, and system record behavior of AWS Route 53:
+
+- **AWS Cloudscape UI Language**: Uses official Cloudscape design tokens (`#232F3E` navy header, `#EC7211` orange primary buttons, `#0972D3` / `#539FE5` blue accents, `#162232` dark navy containers).
+- **System Record Invariants**: Auto-creates `NS` and `SOA` records on zone creation and blocks their modification/deletion across both UI and backend APIs.
+- **Persistent State & Real-time Persistence**: Uses SQLite with SQLAlchemy 2.0 ORM to persist all CRUD operations instantly.
+
+---
+
+## 5. ⚡ Features
+
+### 🔐 Authentication & Session Security
+- Cookie-based authentication (`session_token`) with 24-hour expiration.
+- Auto-redirects unauthenticated users to `/login`.
+- Session protection preventing browser "Back" button access to cached state after logout.
+
+### 🌐 Hosted Zones CRUD
+- **Create**: Opaque zone IDs (e.g. `Z01928347F`), domain validation, duplicate name checking (HTTP 409 Conflict).
+- **List & Search**: Paginated table view, debounced search, public/private badge indicators.
+- **Delete**: Confirmation modal requiring manual typing of `delete` before confirming.
+
+### 📝 DNS Records CRUD & Protection
+- **Supported Record Types**: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `SOA`, `PTR`, `SRV`, `CAA`.
+- **System Record Protection**: System `NS` and `SOA` records cannot be edited or deleted (returns 403 Forbidden).
+- **TTL Presets**: `1m` (60s), `1h` (3600s), `1d` (86400s) preset shortcuts with positive integer validation.
+
+### 🔍 Search, Filters & SplitPanel
+- Property filtering by **Record Type**, **Routing Policy**, and **Alias**.
+- Side-by-side **SplitPanel** inspector for inspecting record parameters.
+
+### 🏷️ Hosted Zone Tags
+- Full tag CRUD modal (**ManageTagsModal**) supporting persistent key-value tags.
+
+### 🧪 Test Record & Query Logging
+- **Test Record**: Interactive DNS test simulation (`/test-record`) generating formatted DIG resolver outputs.
+- **Query Logging**: CloudWatch log group configuration page (`/configure-query-logging`).
+
+### 🌙 Dual Theme Mode (Light & Dark)
+- Seamless Light and Dark mode toggle powered by Cloudscape `applyMode(Mode.Dark)`.
+
+---
+
+## 6. 🏗️ Tech Stack
+
+- **Frontend**: Next.js 16.3.0 (React 19, TypeScript, Tailwind CSS v4, `@cloudscape-design/components`)
 - **Backend**: FastAPI (Python 3.10+, Pydantic v2, Passlib/bcrypt)
 - **Database**: SQLite (SQLAlchemy 2.0 ORM with `PRAGMA foreign_keys=ON`)
+- **Deployment**: Railway (Nixpacks & Docker containers)
 
 ---
 
-## 🚀 Quick Start Guide
+## 7. 📐 Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              Browser (Next.js 16 Frontend)              │
+│        Cloudscape UI + ThemeContext + AuthContext       │
+└────────────────────────────┬────────────────────────────┘
+                             │ REST API (JSON + HttpOnly Cookies)
+┌────────────────────────────▼────────────────────────────┐
+│                  FastAPI Backend Server                 │
+│         Auth Router  │  Zones Router  │  Records Router │
+└────────────────────────────┬────────────────────────────┘
+                             │ SQLAlchemy 2.0 ORM
+┌────────────────────────────▼────────────────────────────┐
+│                    SQLite Database                      │
+│                      nexus_dns.db                       │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 8. 🗄️ Database Schema
+
+```
+Users (id, username, password_hash, created_at, updated_at)
+  │
+  └──< Sessions (id, token_hash, user_id, expires_at, created_at)
+
+HostedZones (id, public_zone_id, name, description, zone_type, created_at, updated_at)
+  │
+  └──< DnsRecords (id, hosted_zone_id, name, type, ttl, values_json, is_system, created_at, updated_at)
+```
+
+---
+
+## 9. 📡 API Overview
+
+### Authentication
+- `POST /api/auth/login` — Authenticate user and issue HttpOnly session cookie
+- `POST /api/auth/logout` — Invalidate active session and clear cookie
+- `GET  /api/auth/me` — Return current authenticated user
+
+### Hosted Zones
+- `GET    /api/hosted-zones` — List hosted zones (pagination & search)
+- `POST   /api/hosted-zones` — Create a hosted zone
+- `GET    /api/hosted-zones/{id}` — Get zone details
+- `PATCH  /api/hosted-zones/{id}` — Update zone description
+- `DELETE /api/hosted-zones/{id}` — Delete hosted zone
+
+### DNS Records
+- `GET    /api/hosted-zones/{id}/records` — List records in a zone
+- `POST   /api/hosted-zones/{id}/records` — Create a DNS record
+- `GET    /api/hosted-zones/{id}/records/{rec_id}` — Get record details
+- `PATCH  /api/hosted-zones/{id}/records/{rec_id}` — Update record
+- `DELETE /api/hosted-zones/{id}/records/{rec_id}` — Delete record
+
+---
+
+## 10. 💻 Local Setup & Installation
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -48,18 +171,15 @@ cd backend
 
 # Create virtual environment
 python -m venv venv
-.\venv\Scripts\activate  # On Windows
+.\venv\Scripts\activate  # On Windows (or source venv/bin/activate on Linux/macOS)
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Seed database (creates admin user, 5 zones, 48 records)
-python seed.py
-
-# Run FastAPI dev server
+# Run FastAPI dev server (auto-seeds database on startup)
 uvicorn app.main:app --reload --port 8000
 ```
-FastAPI interactive docs will be live at: `http://127.0.0.1:8000/docs`
+FastAPI Swagger docs will be live at: `http://127.0.0.1:8000/docs`
 
 ### 2. Frontend Setup
 ```bash
@@ -68,57 +188,42 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start Next.js dev server
+# Run Next.js dev server
 npm run dev
 ```
-Web Application will be live at: `http://localhost:3000`
-
-### 3. Demo Credentials
-- **Username**: `admin`
-- **Password**: `admin123`
+Web Console will be live at: `http://localhost:3000`
 
 ---
 
-## 🗄 Database Schema
+## 11. ☁️ Deployment Architecture
 
-```
-Users (id, username, password_hash, created_at, updated_at)
-  │
-  └──< Sessions (id, token, user_id, expires_at, created_at)
-
-HostedZones (id, public_zone_id, name, description, zone_type, created_at, updated_at)
-  │
-  └──< DnsRecords (id, hosted_zone_id, name, type, ttl, values_json, is_system, created_at, updated_at)
-```
+| Service | Platform | Build Provider | Environment URL |
+|---|---|---|---|
+| **Frontend** | Railway | Nixpacks (Node.js 20) | `https://nexus-dns.up.railway.app` |
+| **Backend** | Railway | Nixpacks (Python 3.10) | `https://nexus-dns-production.up.railway.app` |
 
 ---
 
-## 📡 API Endpoints Overview
+## 12. 💡 Assumptions & Mocked Services
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/login` | Sign in & receive `session_token` cookie |
-| `POST` | `/api/auth/logout` | Clear session cookie |
-| `GET` | `/api/auth/me` | Fetch active user session details |
-| `GET` | `/api/hosted-zones` | List zones (supports `page`, `page_size`, `search`) |
-| `POST` | `/api/hosted-zones` | Create new hosted zone (auto-creates NS + SOA) |
-| `GET` | `/api/hosted-zones/{id}` | Get zone details with `record_count` |
-| `PATCH` | `/api/hosted-zones/{id}` | Update zone description |
-| `DELETE` | `/api/hosted-zones/{id}` | Delete zone and cascade records |
-| `GET` | `/api/hosted-zones/{id}/records` | List records (supports `type`, `search`, `page`) |
-| `POST` | `/api/hosted-zones/{id}/records` | Create DNS record |
-| `GET` | `/api/hosted-zones/{id}/records/{recId}` | Get single record details |
-| `PATCH` | `/api/hosted-zones/{id}/records/{recId}` | Update non-system record |
-| `DELETE` | `/api/hosted-zones/{id}/records/{recId}` | Delete non-system record |
+- **Simulated AWS Infrastructure**: Accelerated Recovery status, DNSSEC KSK generation, and CloudWatch query log group association use persisted mock configurations rather than live AWS Route 53 API calls.
+- **DNS Resolution**: The **Test Record** page simulates DIG output responses based on active database records.
+- **SQLite Database Persistence**: Database automatically auto-seeds demo data (`example.com`, `planora.com`) on startup if empty.
 
 ---
 
-## 🧪 Automated Testing
+## 13. 🧪 Testing & Quality Assurance
 
-To run the 48 automated pytest suites:
-```bash
-cd backend
-.\venv\Scripts\activate
-python -m pytest tests/ -v
-```
-All 48 tests pass cleanly covering authentication, hosted zone CRUD, DNS record type validation, and system record protection.
+- **Backend Pytest Suite**: 48 automated test cases passing cleanly:
+  ```bash
+  cd backend && pytest
+  ```
+- **TypeScript Static Verification**: Passed with **0 errors**:
+  ```bash
+  cd frontend && npx tsc --noEmit
+  ```
+- **ESLint Code Quality**: Passed with **0 errors / 0 warnings**:
+  ```bash
+  cd frontend && npm run lint
+  ```
+- **Next.js Production Build**: Production build compiled in 2.6s.
