@@ -14,7 +14,7 @@ from app.utils.validators import is_valid_hostname, is_valid_ipv4, is_valid_ipv6
 
 # ── Record type literal ──────────────────────────────────
 DnsRecordType = Literal[
-    "A", "AAAA", "CNAME", "TXT", "MX", "NS", "PTR", "SRV", "CAA"
+    "A", "AAAA", "CNAME", "TXT", "MX", "NS", "PTR", "SRV", "CAA", "SOA"
 ]
 
 
@@ -130,6 +130,8 @@ class DnsRecordCreate(BaseModel):
     @model_validator(mode="after")
     def validate_values_for_type(self) -> "DnsRecordCreate":
         """Enforce per-type value shapes on every create."""
+        if self.type == "SOA":
+            raise ValueError("SOA records are system-managed and cannot be manually created")
         _validate_dns_values(self.type, self.values)
         return self
 

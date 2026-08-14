@@ -14,6 +14,9 @@ class HostedZone(Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True
     )
+    public_zone_id: Mapped[str] = mapped_column(
+        String(16), unique=True, nullable=False, index=True
+    )
     name: Mapped[str] = mapped_column(
         String(253), nullable=False, index=True  # regular index, NOT unique
     )
