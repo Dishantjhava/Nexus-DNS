@@ -62,6 +62,7 @@ def get_zone(
 
 
 @router.patch("/{zone_id}")
+@router.put("/{zone_id}")
 def update_zone(
     zone_id: int,
     body: HostedZoneUpdate,
