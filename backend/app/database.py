@@ -44,3 +44,28 @@ def create_tables():
     """Import all models and create tables. Safe to call multiple times."""
     import app.models  # noqa: F401 — triggers model registration with Base
     Base.metadata.create_all(bind=engine)
+
+    # Auto-seed default admin users & demo data if database is empty
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+        if db.query(User).count() == 0:
+            from passlib.hash import bcrypt
+            admin1 = User(username="admin", password_hash=bcrypt.hash("admin123"))
+            admin2 = User(username="admin@gmail.com", password_hash=bcrypt.hash("admin123"))
+            db.add(admin1)
+            db.add(admin2)
+            db.commit()
+            print("Auto-seeded default admin & admin@gmail.com users.")
+            
+            # Import seed logic to populate demo hosted zones if empty
+            try:
+                import seed
+                seed.seed()
+            except Exception as se:
+                print(f"Auto-seed demo zones note: {se}")
+    except Exception as e:
+        db.rollback()
+        print(f"Auto-seed check: {e}")
+    finally:
+        db.close()
