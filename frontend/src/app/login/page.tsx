@@ -8,9 +8,10 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 
 function LoginForm() {
   const [userType, setUserType] = useState<"root" | "iam">("root");
-  const [username, setUsername] = useState("admin@gmail.com");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [step, setStep] = useState<1 | 2>(1); // 1: User/Email, 2: Password (or direct submit)
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -377,6 +378,60 @@ function LoginForm() {
               </form>
             </>
           )}
+
+          {/* AWS-style Demo Credentials Information Box */}
+          <div className="mt-5 p-4 rounded-lg bg-[#EF9B00]/10 border border-[#EC7211]/30 dark:bg-[#162334] dark:border-[#539FE5]/40 text-xs text-[#16191F] dark:text-[#E9EDF0]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 font-bold text-[#16191F] dark:text-[#FFFFFF] text-[13px]">
+                <svg className="w-4 h-4 text-[#0972D3] dark:text-[#539FE5] fill-current" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" fill="none" strokeWidth="1.5" />
+                  <text x="8" y="11.5" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">i</text>
+                </svg>
+                <span>Demo environment</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername("admin@gmail.com");
+                  setPassword("admin123");
+                  setError(null);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2500);
+                }}
+                className="px-2.5 py-1 rounded-md bg-[#0972D3] hover:bg-[#075BB3] dark:bg-[#539FE5] dark:hover:bg-[#3D8AD4] text-white dark:text-[#0F1B2A] font-bold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
+              >
+                {copied ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16">
+                      <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                    </svg>
+                    <span>Filled!</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16">
+                      <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" />
+                      <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" />
+                    </svg>
+                    <span>Copy credentials</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-[#545B64] dark:text-[#9BA7B6] mb-2 leading-relaxed">
+              Use the credentials below to test the AWS Route 53 application:
+            </p>
+            <div className="grid grid-cols-2 gap-2 font-mono text-[11px] bg-white dark:bg-[#0F1B2A] p-2.5 rounded border border-[#D5DBDB] dark:border-[#233246]">
+              <div>
+                <span className="text-[#545B64] dark:text-[#9BA7B6] font-sans block text-[10px] uppercase font-bold">Email / User</span>
+                <span className="font-semibold text-[#16191F] dark:text-[#E9EDF0]">admin@gmail.com</span>
+              </div>
+              <div>
+                <span className="text-[#545B64] dark:text-[#9BA7B6] font-sans block text-[10px] uppercase font-bold">Password</span>
+                <span className="font-semibold text-[#16191F] dark:text-[#E9EDF0]">admin123</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right: Amazon Lightsail Hero Graphic Box */}
