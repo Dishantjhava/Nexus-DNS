@@ -84,6 +84,7 @@ def get_record(
 
 
 @router.patch("/{record_id}")
+@router.put("/{record_id}")
 def update_record(
     zone_id: int,
     record_id: int,
