@@ -1,6 +1,7 @@
 import { DnsRecord, DnsRecordType, HostedZone, PaginatedResponse, User } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = rawBaseUrl.replace(/\/+$/, "");
 
 let onUnauthorizedCallback: (() => void) | null = null;
 
@@ -9,7 +10,8 @@ export function setUnauthorizedHandler(callback: () => void) {
 }
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${cleanEndpoint}`;
   const isGet = !options.method || options.method === "GET";
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
