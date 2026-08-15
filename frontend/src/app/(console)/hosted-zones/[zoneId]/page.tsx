@@ -585,7 +585,7 @@ export default function HostedZoneDetailPage({ params }: PageProps) {
                         >
                           Delete record
                         </Button>
-                        <Button onClick={() => showFeatureNotAvailable("Import zone file")}>
+                        <Button onClick={() => router.push(`/hosted-zones/${zoneId}/import-zone-file`)}>
                           Import zone file
                         </Button>
                         <Button variant="primary" onClick={() => router.push(`/hosted-zones/${zoneId}/create-record`)}>
