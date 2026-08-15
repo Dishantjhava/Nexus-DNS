@@ -15,7 +15,7 @@ from pathlib import Path
 # Ensure the backend package is importable when running as a script
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from passlib.hash import bcrypt
+from app.services.auth_service import hash_password
 
 from app.database import engine, SessionLocal, Base
 from app.models.user import User
@@ -147,11 +147,11 @@ def seed():
         # ── Demo users ────────────────────────────────────
         admin = User(
             username="admin",
-            password_hash=bcrypt.hash("admin123"),
+            password_hash=hash_password("admin123"),
         )
         admin_email = User(
             username="admin@gmail.com",
-            password_hash=bcrypt.hash("admin123"),
+            password_hash=hash_password("admin123"),
         )
         db.add(admin)
         db.add(admin_email)

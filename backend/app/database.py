@@ -50,9 +50,9 @@ def create_tables():
     try:
         from app.models.user import User
         if db.query(User).count() == 0:
-            from passlib.hash import bcrypt
-            admin1 = User(username="admin", password_hash=bcrypt.hash("admin123"))
-            admin2 = User(username="admin@gmail.com", password_hash=bcrypt.hash("admin123"))
+            from app.services.auth_service import hash_password
+            admin1 = User(username="admin", password_hash=hash_password("admin123"))
+            admin2 = User(username="admin@gmail.com", password_hash=hash_password("admin123"))
             db.add(admin1)
             db.add(admin2)
             db.commit()

@@ -16,14 +16,13 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { login, user, loading } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionExpired = searchParams.get("reason") === "session_expired";
 
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const isAlreadyAuthenticated = !loading && !!user;
 
   // Focus input on mount / step change
   useEffect(() => {
@@ -34,12 +33,7 @@ function LoginForm() {
     }
   }, [step]);
 
-  // If already authenticated, redirect silently to console
-  useEffect(() => {
-    if (isAlreadyAuthenticated) {
-      router.replace("/hosted-zones");
-    }
-  }, [isAlreadyAuthenticated, router]);
+  // Allow recruiters and evaluators to test login directly when visiting /login
 
   const handleNextOrSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +80,7 @@ function LoginForm() {
     }
   };
 
-  const isDisabled = submitting || isAlreadyAuthenticated;
+  const isDisabled = submitting;
 
   return (
     <div className="aws-signin-bg">
@@ -394,6 +388,7 @@ function LoginForm() {
                 onClick={() => {
                   setUsername("admin@gmail.com");
                   setPassword("admin123");
+                  setStep(2);
                   setError(null);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2500);

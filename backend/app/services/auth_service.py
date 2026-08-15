@@ -8,12 +8,12 @@ Token flow:
       calls ``get_user_by_token`` to look up the session row.
 """
 
+import bcrypt
 import hashlib
 import hmac
 import secrets
 from datetime import datetime, timedelta
 
-from passlib.hash import bcrypt
 from sqlalchemy.orm import Session as DBSession, joinedload
 
 from app.config import SECRET_KEY, SESSION_TTL_HOURS
@@ -21,7 +21,22 @@ from app.models.session import Session
 from app.models.user import User
 
 
-# ── Helpers ──────────────────────────────────────────────
+# ── Password Hashing Helpers ─────────────────────────────
+
+def hash_password(password: str) -> str:
+    """Hash a plain text password using bcrypt."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    """Verify a plain text password against a stored bcrypt hash."""
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
+    except Exception:
+        return False
+
+
+# ── Session Token Helpers ────────────────────────────────
 
 def _hash_token(raw_token: str) -> str:
     """HMAC-SHA256 hex-digest of raw session token keyed by SECRET_KEY."""
@@ -38,7 +53,7 @@ def authenticate_user(
     user = db.query(User).filter(User.username.ilike(clean_user)).first()
     if user is None:
         user = db.query(User).filter((User.username == "admin") | (User.username == "admin@gmail.com")).first()
-    if user is None or not bcrypt.verify(password, user.password_hash):
+    if user is None or not verify_password(password, user.password_hash):
         return None
     return user
 

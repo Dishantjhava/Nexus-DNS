@@ -2,8 +2,10 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from passlib.hash import bcrypt
 from sqlalchemy import create_engine, event
+from app.services.auth_service import hash_password
+
+# ── Test engine (in-memory SQLite) ───────────────────────
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -68,7 +70,7 @@ def client(db):
 @pytest.fixture()
 def seed_user(db):
     """Insert a test user (testuser / testpass) and return the model."""
-    user = User(username="testuser", password_hash=bcrypt.hash("testpass"))
+    user = User(username="testuser", password_hash=hash_password("testpass"))
     db.add(user)
     db.commit()
     db.refresh(user)

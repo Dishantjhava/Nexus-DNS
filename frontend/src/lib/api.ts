@@ -18,16 +18,21 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
     Accept: "application/json",
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-    credentials: "include", // Send session_token cookie automatically
-    // Always bypass browser cache for GET so refresh fetches fresh data from FastAPI → SQLite
-    cache: isGet ? "no-store" : "default",
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+      credentials: "include", // Send session_token cookie automatically
+      // Always bypass browser cache for GET so refresh fetches fresh data from FastAPI → SQLite
+      cache: isGet ? "no-store" : "default",
+    });
+  } catch {
+    throw new Error(`Cannot connect to backend server (${API_BASE_URL}). Please ensure FastAPI is running on port 8000.`);
+  }
 
   if (response.status === 401) {
     if (onUnauthorizedCallback) {
