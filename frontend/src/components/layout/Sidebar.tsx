@@ -58,7 +58,14 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   return (
     <SideNavigation
       activeHref={pathname}
-      header={{ href: "/hosted-zones", text: "Route 53" }}
+      header={{
+        href: "/hosted-zones",
+        text: "Route 53",
+        logo: {
+          src: "/route53-icon.svg",
+          alt: "Route 53 Logo",
+        },
+      }}
       items={navItems}
       onFollow={(e) => {
         if (!e.detail.external) {

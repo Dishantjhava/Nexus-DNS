@@ -65,13 +65,21 @@ function LoginForm() {
       router.push("/hosted-zones");
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : "";
-      const msg =
+      let msg = "Login failed. Please check your credentials and try again.";
+      if (
+        raw.toLowerCase().includes("connect") ||
+        raw.toLowerCase().includes("unreachable") ||
+        raw.toLowerCase().includes("failed to fetch")
+      ) {
+        msg = raw;
+      } else if (
         raw.toLowerCase().includes("invalid") ||
         raw.toLowerCase().includes("credential") ||
         raw.toLowerCase().includes("unauthorized") ||
         raw.toLowerCase().includes("401")
-          ? "Login failed. Invalid username or password."
-          : "Login failed. Please check your credentials and try again.";
+      ) {
+        msg = "Login failed. Invalid username or password.";
+      }
       setError(msg);
       setSubmitting(false);
       if (step === 2) {

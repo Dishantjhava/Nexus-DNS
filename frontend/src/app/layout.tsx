@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   title: "Nexus DNS - Amazon Route 53 Console",
   description: "Amazon Route 53 Cloudscape Clone",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/favicon.ico",
-    apple: "/icon.png",
+    icon: "/route53-icon.svg",
+    shortcut: "/route53-icon.svg",
+    apple: "/route53-icon.svg",
   },
 };
 
